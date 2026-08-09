@@ -2,6 +2,8 @@ import random
 import time
 from datetime import datetime
 
+from kafka_producer import send_telemetry
+
 
 def generate_sensor_data():
     temperature = round(random.uniform(20, 35), 2)
@@ -24,6 +26,8 @@ def generate_sensor_data():
 while True:
     sensor_data = generate_sensor_data()
 
-    print(sensor_data)
+    print("Sensor data:", sensor_data)
+
+    send_telemetry(sensor_data)
 
     time.sleep(2)
