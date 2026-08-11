@@ -3,6 +3,14 @@ from pathlib import Path
 from sklearn.ensemble import IsolationForest
 import joblib
 
+import sys
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from alerts.alert_manager import generate_alert
+
+
 # --------------------------------------------------
 # Paths
 # --------------------------------------------------
@@ -12,6 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 CSV_FILE = BASE_DIR / "data" / "telemetry.csv"
 MODEL_FILE = BASE_DIR / "ml" / "model.pkl"
 OUTPUT_FILE = BASE_DIR / "data" / "anomaly_results.csv"
+
 
 # --------------------------------------------------
 # Load telemetry data
@@ -25,6 +34,7 @@ df = pd.read_csv(CSV_FILE)
 print()
 print("Total records:", len(df))
 
+
 # --------------------------------------------------
 # Select sensor features
 # --------------------------------------------------
@@ -37,6 +47,7 @@ features = [
 ]
 
 X = df[features]
+
 
 # --------------------------------------------------
 # Train Isolation Forest
@@ -53,6 +64,7 @@ model = IsolationForest(
 
 model.fit(X)
 
+
 # --------------------------------------------------
 # Predict anomalies
 # --------------------------------------------------
@@ -60,12 +72,13 @@ model.fit(X)
 df["anomaly_prediction"] = model.predict(X)
 
 # Isolation Forest:
-#  1  = Normal
-# -1  = Anomaly
+# 1  = Normal
+# -1 = Anomaly
 
 df["anomaly"] = df["anomaly_prediction"].apply(
     lambda x: "Anomaly" if x == -1 else "Normal"
 )
+
 
 # --------------------------------------------------
 # Calculate anomaly score
@@ -73,17 +86,43 @@ df["anomaly"] = df["anomaly_prediction"].apply(
 
 df["anomaly_score"] = model.decision_function(X)
 
+
+# --------------------------------------------------
+# Generate alerts for anomalies
+# --------------------------------------------------
+
+print()
+print("Checking for anomalies and generating alerts...")
+
+for _, row in df[df["anomaly"] == "Anomaly"].iterrows():
+
+    telemetry = {
+        "temperature": row["temperature"],
+        "humidity": row["humidity"],
+        "pressure": row["pressure"],
+        "vibration": row["vibration"]
+    }
+
+    generate_alert(
+        device_id=row["deviceId"],
+        telemetry=telemetry,
+        anomaly_score=row["anomaly_score"]
+    )
+
+
 # --------------------------------------------------
 # Save model
 # --------------------------------------------------
 
 joblib.dump(model, MODEL_FILE)
 
+
 # --------------------------------------------------
 # Save results
 # --------------------------------------------------
 
 df.to_csv(OUTPUT_FILE, index=False)
+
 
 # --------------------------------------------------
 # Display results
@@ -110,6 +149,7 @@ print(OUTPUT_FILE)
 
 print()
 print("Sample results:")
+
 print(
     df[
         [
