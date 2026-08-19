@@ -1,7 +1,7 @@
 from kafka import KafkaProducer
 import json
 
-KAFKA_BROKER = "localhost:9092"
+KAFKA_BROKER = "127.0.0.1:9092"
 KAFKA_TOPIC = "iot-telemetry"
 
 producer = KafkaProducer(

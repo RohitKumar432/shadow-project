@@ -2,13 +2,24 @@ from kafka import KafkaConsumer
 import json
 import csv
 from pathlib import Path
+import sys
+
+# --------------------------------------------------
+# Project root
+# --------------------------------------------------
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from ml.live_detector import process_telemetry
 
 
 # --------------------------------------------------
 # Kafka configuration
 # --------------------------------------------------
 
-KAFKA_BROKER = "localhost:9092"
+KAFKA_BROKER = "127.0.0.1:9092"
 KAFKA_TOPIC = "iot-telemetry"
 
 
@@ -103,6 +114,17 @@ try:
             ])
 
         print("Saved to:", CSV_FILE)
+        print()
+
+        
+        # ------------------------------------------
+        # Run live ML anomaly detection
+        # ------------------------------------------
+
+        print("Running live anomaly detection...")
+
+        process_telemetry(data)
+
         print()
 
 
