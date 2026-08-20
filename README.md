@@ -2257,6 +2257,13 @@ The Streamlit application opens in the browser.
 The dashboard reads the generated telemetry and ML results and presents them through charts, metrics, and tables.
 
 
+### Dashboard Preview
+
+The following screenshot shows the IoT Telemetry Dashboard running with telemetry and anomaly detection results.
+
+![IoT Telemetry Dashboard](./dashboard/IoT_Telemetry_Dashboard.png)
+
+
 
 🔄 38. Complete Runtime Flow
 
